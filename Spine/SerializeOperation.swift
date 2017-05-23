@@ -12,6 +12,8 @@ import SwiftyJSON
 /// A SerializeOperation serializes a JSONAPIDocument to JSON data in the form of Data.
 class SerializeOperation: Operation {
 	fileprivate let resources: [Resource]
+    fileprivate let includedResources: [Resource]?
+
 	let valueFormatters: ValueFormatterRegistry
 	let keyFormatter: KeyFormatter
 	var options: SerializationOptions = [.IncludeID]
@@ -25,6 +27,7 @@ class SerializeOperation: Operation {
 		self.resources = document.data ?? []
 		self.valueFormatters = valueFormatters
 		self.keyFormatter = keyFormatter
+        self.includedResources = document.included
 	}
 	
 	override func main() {
@@ -37,9 +40,20 @@ class SerializeOperation: Operation {
 				serializeResource(resource)
 			}
 		}
-		
+
+        var includedData: Any?
+        if let included = includedResources {
+            includedData = included.map({ resource in
+                serializeResource(resource)
+            })
+        }
+
 		do {
-			let serialized = try JSONSerialization.data(withJSONObject: ["data": serializedData], options: [])
+            var jsonDict = ["data": serializedData]
+            if let _includedData = includedData {
+                jsonDict["included"] = _includedData
+            }
+			let serialized = try JSONSerialization.data(withJSONObject: jsonDict, options: [])
 			result = Failable.success(serialized)
 		} catch let error as NSError {
 			result = Failable.failure(SerializerError.jsonSerializationError(error))

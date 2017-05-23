@@ -99,7 +99,10 @@ open class Resource: NSObject, NSCoding {
 	
 	/// The metadata for this resource.
 	public var meta: [String: Any]?
-	
+
+    /// Resources to add in included field
+    public var resourcesToAddInIncluded: [Resource]?
+
 	/// Raw relationship data keyed by relationship name.
 	var relationships: [String: RelationshipData] = [:]
 	

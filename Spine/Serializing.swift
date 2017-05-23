@@ -77,7 +77,8 @@ public class Serializer {
 	///
 	/// - returns: Serialized data.
 	public func serializeResources(_ resources: [Resource], options: SerializationOptions = [.IncludeID]) throws -> Data {
-		let document = JSONAPIDocument(data: resources, included: nil, errors: nil, meta: nil, links: nil, jsonapi: nil)
+        let included = resources.flatMap {$0.resourcesToAddInIncluded}.flatMap {$0}
+		let document = JSONAPIDocument(data: resources, included: included, errors: nil, meta: nil, links: nil, jsonapi: nil)
 		return try serializeDocument(document, options: options)
 	}
 
